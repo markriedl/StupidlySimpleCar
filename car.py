@@ -4,22 +4,6 @@ import numpy as np
 import tflearn
 import copy, sys
 
-#########################
-# HELPER FUNCTIONS
-
-# Preprocessing function
-def preprocess(data, num_columns, data_columns):
-	# Figure out which columsn to remove
-	all_columns = range(num_columns)
-	columns_to_ignore = list(set(all_columns) - set(data_columns))
-	# Sort columns_to_ignore by descending id and delete
-	for id in sorted(columns_to_ignore, reverse=True):
-		[r.pop(id) for r in data]
-	return np.array(data, dtype=np.float32)
-
-#########################
-# Good stuff starts here!
-
 # Handle command line arguments
 loadModel = False # Is the user requesting to use a pre-trained model?
 modelname = '' # If so, what is the name of that model filename?
@@ -51,20 +35,14 @@ if not loadModel:
 	# Load CSV file
 	# For some reason, the CSV must have a single label column. So the dataset has a last dummy column.
 	from tflearn.data_utils import load_csv
-	input_data, input_labels = load_csv(filename)
-	# Make some copies
-	input_labels = copy.deepcopy(input_data)
+	input_data, dummy = load_csv(filename, columns_to_ignore=[5, 6, 7, 8])
+	input_labels, dummy = load_csv(filename, columns_to_ignore=[1, 2, 3, 4])
 
-	# Number of columns
-	num_columns = 8
-	# Which columns have data
-	data_columns = [0, 1, 2, 3]
-	# Which columns have labels
-	label_columns=[4, 5, 6, 7]
-
-	# Preprocess data
-	data = preprocess(input_data, num_columns, data_columns)
-	labels = preprocess(input_labels, num_columns, label_columns)
+	# Put data and labels into a numpy array (matrix)
+	#data = preprocess(input_data, num_columns, data_columns)
+	#labels = preprocess(input_labels, num_columns, label_columns)
+	data = np.array(input_data, dtype=np.float32)
+	labels = np.array(input_labels, dtype=np.float32)
 
 # Build neural network
 net = tflearn.input_data(shape=[None, 4]) # 4 inputs
